@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "settings.h"
+
+/*	readSettings read the settings file 'spellrc' with the variables dictionary, maxcorrection	*
+*	and autocorrect. dictionary being the dictionary file the program will use as its			*
+*	dictionary, maxcorrection being the number of different letters for the word being mispelt	*
+*	to be changed into a word from the dictionary, and autocorrect having the value to tell		*
+*	the program whether to automatically correct the spelling of the mispelt word.				*/
+
+void readSettings(Settings* settings)
+{		
+		FILE* f = fopen("spellrc", "r"); /* Open the spellrc file for reading */
+		int readN = 1; /* Makes the number of items read as 1 so that it isn't the end-of-file */
+		int done = 0, maxcorVal; /* done is the flag to show when the do-while loop stops. maxcorVal is the number of letters for the mispelt word to be different for spellchecking */
+		char* varName = (char*)malloc(51 * sizeof(char)); /* Dynamically allocating a 50 character array or a string of 50 characters for the words being read in. */
+		char dictionaryName[51]; /* Name of the dictionary has a maximum of 50 characters plus the '\0' (null terminator) */
+		char autocorVal[4]; /* Value of the auto-correction option: yes or no, plus the '\0' (null terminator) */
+		
+		
+		
+		if(f == NULL) /* If the file isn't opened correctly, throw an error message */
+		{
+			perror("Error in opening file for readSettings");
+		}
+		else /* Otherwise, start reading the settings file */
+		{
+				do
+				{
+						readN = fscanf(f, "%s = ", varName); /* read the variable in the file */
+						if(readN == EOF) /* If it reads the end of file, stop the loop */
+						{
+							done = 1;
+						}
+						else /* Otherwise, continue */
+						{
+							if(strcmp(varName, "dictionary") == 0) /* If the variable is "dictionary", then read the dictionary filename and store it into the settings struct. */
+							{
+								fscanf(f, "%s", dictionaryName); /* read dictionary filename */
+								
+								if(dictionaryName == NULL) /* If the dictionary name is NULL, then no dictionary is found */
+								{
+									printf("Dictionary not found");
+								}
+								else
+								{
+									strcpy(settings->dictionary, dictionaryName); /* makes the name of the dictionary file in the struct as the name read from the file */
+								}
+							}
+							else if(strcmp(varName, "maxcorrection") == 0) /* If the variable is maxcorrection */
+							{
+								fscanf(f, "%d", &maxcorVal); /* read the maxcorrection integer */
+								
+								if(maxcorVal < 0) /* If the maxcorrection value is less than 0, throw an error message */
+								{
+									printf("Max Correction Value cannot be negative");
+								}
+								else
+								{
+									settings->maxCorrection = maxcorVal; /* make the value of the maxcorrection value in the struct with the value read from the file */
+								}
+							}
+							else if(strcmp(varName, "autocorrect") == 0) /* if the variable is autocorrect */
+							{
+								fscanf(f, "%s", autocorVal); /* read the value for autocorrect */
+								
+								if(strcmp(autocorVal, "yes") == 0 || strcmp(autocorVal, "no") == 0) /* if the value of autocorrect is either yes or no, then assign it to the field in the struct */
+								{
+									strcpy(settings->autocorrect, autocorVal); /* allocate the setting's autocorrect field as the value read from the file */
+								}
+								else
+								{
+									printf("Autocorrect value is not Yes or No."); /* otherwise, if it is not 'yes' or 'no', throw an error message */
+								}
+							}
+						}
+				}while(!done);
+		}
+		
+		fclose(f); /* close the file being read */
+		free(varName); /* free the variable name that was used to read in from the file */
+}
+

@@ -1,0 +1,21 @@
+#ifndef SETTINGS
+#define SETTINGS
+typedef struct{
+	char dictionary[51];
+	int maxCorrection;
+	char autocorrect[4];
+} Settings;
+#endif
+
+typedef struct LinkedListNode{
+	char word[51];
+	struct LinkedListNode* next;
+} LinkedListNode;
+
+typedef struct{
+	struct LinkedListNode* head;
+	int count;
+} LinkedList;
+
+LinkedList* makeDictionary(Settings* settings);
+void structToArray(char** array, LinkedList* list);

@@ -1,0 +1,13 @@
+/* Struct for storing the settings file 'spellrc' values */
+
+#ifndef SETTINGS
+#define SETTINGS
+
+typedef struct{
+	char dictionary[51];
+	int maxCorrection;
+	char autocorrect[4];
+} Settings;
+#endif
+
+void readSettings(Settings* settings);

@@ -1,0 +1,1 @@
+LinkedList* readUserFile(Settings* settings, char* filename);

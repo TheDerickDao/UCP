@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "settings.h"
+#include "dictionary.h"
+#include "check.h"
+
+int actionFunc(char* word, char* suggestion)
+{  
+    int decision = FALSE;
+	char change;
+	if(suggestion != NULL)
+	{	
+		if(settings->autocorrect == "yes")
+		{
+			decision = TRUE;
+		}
+		else
+		{
+			printf("Original Word: %s, Suggested Correction: %s", word, suggestion);
+			printf("Do you want to correct the original word?");
+			printf("Y - Yes, N - No");
+			scanf("%c", &change);
+			
+			if(change == 'y' || change == 'Y')
+			{
+				decision = TRUE;
+			}
+			else if(change == 'n' || change == 'N')
+			{
+				decision = FALSE;
+			}
+			else
+			{
+				printf("Input is not 'Y' or 'N' to change the original word");
+			}
+		}
+	}
+	return decision;
+}

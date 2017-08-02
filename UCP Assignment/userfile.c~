@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "dictionary.h"
+#include "settings.h"
+#include "userfile.h"
+
+LinkedList* readUserFile(Settings* settings, char* filename)
+{
+	FILE* f = fopen(filename, "r");
+	LinkedList* list;
+	LinkedListNode* current;
+	char fWord[51];
+	int wordCount = 0;
+
+	list = (LinkedList*)malloc(sizeof(LinkedList));
+	list->head = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+	current = list->head;
+	
+	if(f == NULL)
+	{
+		perror("Error in opening file in makeDictionary");
+	}
+	else
+	{
+		printf("start reading user file\n");
+		while(fscanf(f, "%s", fWord) == 1)
+		{
+			memcpy(current->word, fWord, 51);
+			wordCount++;
+			current->next = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+			current = current->next;
+		}
+		list->count = wordCount;
+	}
+
+	fclose(f);
+	
+	printf("finished reading user file\n");
+	return list;
+}
+
+void freeList(LinkedListNode* list)
+{
+	LinkedListNode* curr = list->head;
+	LinkedListNode* next = curr->next;
+	printf("start freeing list");
+
+	while(curr->next->next != NULL)
+	{
+		free(curr);
+		curr = next;
+		next = curr->next;
+	}
+	free(next);
+	free(curr);
+	free(list);
+	printf("finished freeing list");
+}

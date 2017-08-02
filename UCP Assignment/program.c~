@@ -1,0 +1,154 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "settings.h"
+#include "readFile.h"
+#include "check.h"
+
+/*	actionFunc is the function used for the pointer to a function in main				*
+*	and passing it through to the check() function provided for the assignment			*
+*																						*
+*	Parameters: Takes a word that is from the user file and a suggested word to be		*
+*	auto-corrected.																		*
+*																						*
+*	Returns a value: TRUE or FALSE depending on the decision made by the user,			*
+*	or if the the auto-correct value from the settings file is "no".					*/
+
+int actionFunc(char* word, char* suggestion)
+{  
+	/* Makes the initial decision to be FALSE (do not auto-correct) */
+    int decision = FALSE; 
+	/* User enters a char value that indicates whether the user wants to autocorrect or not */	
+	char change;
+	/* Makes a struct for the settings information */
+	Settings* settings = (Settings*)malloc(sizeof(Settings)); 
+	/* Reads the settings file and allocated the required fields to the struct */
+	readSettings(settings);	
+
+	/* If the word to be auto-corrected to is not NULL then... */
+	if(suggestion != NULL) 
+	{	
+		/* From the settings file, if the auto-correct value is yes, then allow to auto-correct */
+		if(strcmp(settings->autocorrect, "yes") == 0) 
+		{
+			decision = TRUE;
+		}
+		else
+		{
+			/* Prompt the user to answer if they want the original word changed into the suggested word given */
+			printf("Original Word: %s, Suggested Correction: %s\n", word, suggestion);
+			printf("Do you want to correct the original word?\n");
+			printf("Y - Yes, N - No\n");
+			/* Prompts the user for input on whether to auto correct a word */			
+			scanf(" %c", &change);
+			
+			/* If the user inputs 'y' for yes, then allow for the word to change */
+			if((change == 'y' || change == 'Y')) 
+			{
+				decision = TRUE;
+			}
+			/* If the user inputs 'n' for no, do not change the word into the suggested word */
+			else if(change == 'n' || change == 'N') 
+			{
+				decision = FALSE;
+			}
+			/* if the input is anything but 'y' or 'n', print an error to the user and don't change. */
+			else 
+			{
+				printf("Word not changed. Input is not 'Y' or 'N' to change the original word\n");
+			}
+		}
+	}
+	/* free the memory allocated for settings */
+	free(settings); 
+	return decision;
+}
+
+int main(int argc, char* argv[])
+{
+	/*	Create a list containing dictionary words,		*
+	*	a list for the words from the user file,		*
+	*	an array to contain all the dictionary words,	*
+	*	an array containing the words from the user		*
+	*	file and a settings file.						*/
+	LinkedList* dictlist;
+	LinkedList* userlist;
+	char** dictionaryArray;
+	char** userFileArray;
+	Settings* settings;
+	/* Points the pointer to the function actionFunc above */
+	ActionFunc decisionPtr = &actionFunc; 
+	char* filename = argv[1];
+	int i;
+	
+	/* Start reading the settings file */
+	printf("Start reading settings\n"); 
+	/* read the settings file and input the information into a struct */
+	settings = (Settings*)malloc(sizeof(Settings)); 
+	readSettings(settings);
+	printf("Finished reading settings\n");
+	/* Finish reading the settings file */ 
+	
+	/* Start creating the dictionary in a LL */
+	printf("Start making dictionary\n"); 
+	/* Make a linked list from the dictionary file given through the settings file */
+	dictlist = makeDictionary(settings); 
+	/* Dynamically allocate an array of strings */
+	dictionaryArray = (char**)malloc(dictlist->count * sizeof(char*)); 
+	/* Convert the linked list made before into an array we made previously */
+	listToArray(dictionaryArray, dictlist, dictlist->count); 
+	printf("Finished making dictionary\n");	
+	/* Finish making the dictionary */
+
+	/* Start reading the user file */
+	printf("Start reading user file\n"); 
+	/* Make a linked list from the user file with the file name from the command line */
+	userlist = readUserFile(settings, filename); 
+	/* Dynamically allocate an array of strings */
+	userFileArray = (char**)malloc(userlist->count * sizeof(char*)); 
+	/* Fill the array we made previously with the words from the linked list */
+	listToArray(userFileArray, userlist, userlist->count); 
+	printf("Finished reading user file\n"); 
+	/* Finish reading the user file */
+	
+	/* Prompts the check function to check whether a word is to be auto-corrected */
+	check(userFileArray, userlist->count, dictionaryArray, dictlist->count, settings->maxCorrection, decisionPtr); 
+	
+	/* Start rewriting the changes to the user file */
+	printf("Rewriting changes to the user file\n"); 
+	/* After the words have been checked, write all changed words back into the user input file they provided on the command line */
+	writeFile(userFileArray, filename, userlist->count); 
+
+	/* Start freeing the linked list */
+	printf("Start freeing lists and arrays\n"); 
+	
+	/* Free each index of the array */
+	for(i=0; i < userlist->count; i++)
+	{
+		if(userFileArray[i] != 0)
+		{
+			free(userFileArray[i]);
+		}
+	}
+
+	/* Free the array of dictionary words */
+	free(dictionaryArray); 
+	dictionaryArray = NULL;
+	/* Free the array that contains words from the user file */
+	free(userFileArray); 
+	userFileArray = NULL;
+
+	/* Free the settings struct, linked list of dictionary words, linked list of user provided words */
+	free(settings); 
+	freeList(dictlist);
+	freeList(userlist);
+	
+	
+	printf("Finished freeing list and arrays\n");
+	/* Finish freeing the lists */
+
+	/* Tell the user that the changes have been made */
+	printf("Spellcheck complete. Changes have been made to the user file.\n"); 
+	
+	return 0;
+}

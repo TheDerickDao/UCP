@@ -1,0 +1,197 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "readFile.h"
+#include "settings.h"
+
+/*	This function passes through a settings struct by reference and returns a linked	*
+*	list that is filled with words from the provided dictionary seen through the 		*
+*	settings file.																		*/
+
+LinkedList* makeDictionary(Settings* settings)
+{
+	/* Opens the dictionary file provided through the Settings struct */
+	FILE* f = fopen(settings->dictionary, "r");
+	LinkedList* list;
+	LinkedListNode* current;
+	/* A word can be assumed to be no more than 50 characters + the '\0' (null terminator) */
+	char fWord[51]; 
+	int wordCount = 0;
+
+	/* Create the list by dynamically allocating memory */
+	list = (LinkedList*)malloc(sizeof(LinkedList)); 
+	/* Dynamically allocate the nodes in each list */
+	list->head = (LinkedListNode*)malloc(sizeof(LinkedListNode)); 
+	/* the current pointer points to the head of the list (first element of the list) */
+	current = list->head; 
+	current->next = NULL;	
+
+	/* If the file isn't opened correctly then prompt an error */
+	if(f == NULL)
+	{
+		perror("Error in opening file in makeDictionary\n");
+	}
+	/* If the file is opened correctly, Start making the dictionary */
+	else 
+	{
+		/* Reads the first word in the dictionary that is seperated from the next word by a line break */
+		while(fscanf(f, "%s\n", fWord) != EOF) 
+		{
+			/* If the word read is not the end-of-file, then... */
+			/* Copy the word into the word field in the current node */
+			strcpy(current->word, fWord); 
+			/* Increment the number of words in the list by 1 */
+			wordCount++; 
+			/* Dynamically create the next node in the list */
+			current->next = (LinkedListNode*)malloc(sizeof(LinkedListNode)); 
+			/* Point the current pointer to the next node we just created */
+			current = current->next; 
+			current->next = NULL;
+		}
+		/* Make the count value of the list the number of words in the list for future reference */
+		list->count = wordCount; 
+	}
+
+	/* Close the FILE pointer that was opened for reading. */
+	fclose(f); 
+
+	/* Return the list filled with words from the dictionary file */
+	return list; 
+}
+
+/*	structToArray converts a list passed by reference into a dynamically allocated array	*
+*	that was also passed by reference and stores the words in the list into the array.		*
+*	This function returns nothing, rather alters the parameters that were passed in.		*/
+
+void listToArray(char** array, LinkedList* list, int arrayLength)
+{
+	int i;
+	LinkedListNode* current = list->head; /* Points the current pointer to the first element in the linked list */
+
+	for(i = 0; i < arrayLength; i++)
+	{
+		/* If the current pointer points to a node; at the index i, put the current word from the node into the array. */
+		if(current != NULL) 
+		{
+			/* Put the word from the current node into the array passed by reference, at index i */
+			array[i] = current->word; 
+			/* Point the current pointer to the next node in the list */
+			current = current->next; 
+		}
+	}
+}
+
+/*	readUserFile reads the user file passed through, through the command line	*
+*	The function takes a Settings struct and a file name that was provided on	*
+*	the command line. The function returns a list the is filled with words		*
+*	from the file the user provided to be spellchecked.							*/
+
+LinkedList* readUserFile(Settings* settings, char* filename)
+{
+	/* Opens the user input file for reading */
+	FILE* f = fopen(filename, "r"); 
+	LinkedList* list;
+	LinkedListNode* current;
+	/* A word can be max. 50 characters long plus the '\0' (null terminator) */
+	char fWord[51]; 
+	/* Amount of words in the linked list */
+	int wordCount = 0; 
+
+	/* Create the list */
+	list = (LinkedList*)malloc(sizeof(LinkedList)); 
+	/* Create the node in the list */
+	list->head = (LinkedListNode*)malloc(sizeof(LinkedListNode));	
+	/* Point the current pointer to the first element in the list (head) */
+	current = list->head; 	
+	current->next = NULL;
+	
+	/* If the file failed to open, print an error message */
+	if(f == NULL) 
+	{
+		perror("Error in opening file in makeDictionary");
+	}
+	/* If the file opened properly, then start reading the user file */
+	else 
+	{
+		/* reads one word at a time from the user file */
+		while(fscanf(f, "%s", fWord) == 1) 
+		{
+			/* Copys the word read to the current node's word field */
+			strcpy(current->word, fWord); 
+			/* Increment the amount of words in the list */
+			wordCount++; 
+			/* Dynamically allocate the next node in the list */
+			current->next = (LinkedListNode*)malloc(sizeof(LinkedListNode)); 
+			/* Point the current pointer to the node that was just previously created */
+			current = current->next; 
+			current->next = NULL;
+		}
+		/* Alters the count field in the list to the amount of words in the list for future reference */
+		list->count = wordCount; 
+	}
+
+	/* Close the file being read */
+	fclose(f); 
+
+	/* Return the list filled with words from the user input file */
+	return list; 
+}
+
+/*	freeList is a function that frees a linked list that is passed by reference.	*
+*	The function returns nothing, but alters the state of the list being passed in.	*/
+
+void freeList(LinkedList* list)
+{
+	/* Current pointer pointing to the first element in the list */
+	LinkedListNode* curr = list->head; 
+
+	/* While the current node is not NULL, then ... */
+	while(curr != NULL) 
+	{
+		/* Make the head of the list the node after the current node */
+		list->head = curr->next;
+		/* free the current node */
+		free(curr); 
+		/* make the current pointer point to the head of the list */
+		curr = list->head; 
+	}
+	/* Free the current pointer */
+	free(curr);
+	curr = NULL;
+	/* Free the list */
+	free(list); 
+	list = NULL;
+}
+
+/*	writeFile writes to a file. The function takes a filename of the file you want to write in,	*
+*	an array of words to write into the file and the array length of the array of words.		*
+*	The function returns nothing, but alters the state of the file being written to.			*/
+
+void writeFile(char** array, char* filename, int arrayLength)
+{
+	int i;
+	/* Open the file that is being written into. */
+	FILE* f = fopen(filename, "w"); 
+	/* Seperator between two words */
+	char* space = " "; 
+
+	/* If the file isn't opened properly, throw an error message */
+	if(f == NULL) 
+	{
+		perror("Error in opening file to write to");
+	}
+	/* Otherwise, write to the file */
+	else 
+	{
+		for(i = 0; i < arrayLength; i++)
+		{
+			/* Writes the word at index i in the array of words to the file */
+			fputs(array[i], f); 
+			/* Writes a space to seperate the following words being written into the file */
+			fputs(space, f); 
+		}
+	}
+
+	/* Close the file being written to */
+	fclose(f); 
+}

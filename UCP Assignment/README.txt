@@ -1,0 +1,96 @@
+README.txt
+
+***********************************************************
+* A list of all files you're submitting and their purpose *
+***********************************************************
+
+program.c -> 	Connects the user with the program and has the callback function
+
+readFile.c -> 	Reads the dictionary and user input file and puts it in a list. Has a function that converts a list to an array
+
+settings.c -> 	Reads the settings file 'spellrc' and converts the information into a Settings struct for use in the program.
+
+check.c -> 		Provided for the assignment through Blackboard
+
+readFile.h -> 	Header file; has a type declaration for a linked list and the nodes and the settings struct
+
+settings.h -> 	Header file; includes the settings struct and all the functions' signatures used in settings.c
+
+check.h ->		Provided for the assignment through Blackboard
+
+Makefile ->		A Makefile used to compile the program. Has a clean method to clean all .o and executables from the current directory.
+
+spellrc ->		A settings file that can be replaced but not renamed by the user that contains information about the number of maxCorrection, autocorrect and the dictionary file.
+
+linux.word ->	A dictionary that is used for testing the file. The user needs to replace this file with the dictionary file they intend to use and change the value of the dictionary file in spellrc.
+
+*********************************************************************************
+* A statement of how much of the assignment you completed; specifically:		*
+*	1. How much of the required functionality you attempted to get working, and	*
+*	2. How much actually does work, to the best of your knowledge.				*
+*********************************************************************************
+
+1. The amount of required functionality I attempted to get working is 95%, where the 5% of missing functionality would be 	      formatting because it is assumed in the specification to omit formatting (such when you write to the user input file).
+
+2. The amount of of the program that actually works to the best of my knowledge would be 99%, where the 1% are excessive freeing of my array and/or linked lists.
+
+***************************************************************************************************************
+* A list of issues reported by valgrind, if any, along with any other bugs or defects you know about, if any. *
+***************************************************************************************************************
+
+	==9547== Invalid read of size 4
+	==9547==    at 0x8048D57: freeList (readFile.c:152)
+	==9547==    by 0x8048945: main (program.c:128)
+	==9547==  Address 0x71e79e4 is 52 bytes inside a block of size 56 free'd
+	==9547==    at 0x4006CAF: free (vg_replace_malloc.c:446)
+	==9547==    by 0x80488E7: main (program.c:114)
+	==9547== 
+	==9547== Invalid free() / delete / delete[] / realloc()
+	==9547==    at 0x4006CAF: free (vg_replace_malloc.c:446)
+	==9547==    by 0x8048D69: freeList (readFile.c:154)
+	==9547==    by 0x8048945: main (program.c:128)
+	==9547==  Address 0x71e79b0 is 0 bytes inside a block of size 56 free'd
+	==9547==    at 0x4006CAF: free (vg_replace_malloc.c:446)
+	==9547==    by 0x80488E7: main (program.c:114)
+	==9547== 
+
+*************************************************************************************************************************
+* A statement of which computer you tested your code on. This must be either:											*
+*	- One of the four saeshell0Xp machines, or																			*
+*	- One of the building-314 lab machines. In this case, specify the room number (e.g. 314.220) and the "Service Tag" 	*
+*	- a unique 7-character ID found on a black sticker on the top of each machine.										*
+*************************************************************************************************************************
+	(314.220)
+	Service Tag: 8FWZF2S
+	Express Service Code: 18376651540
+
+	(314.218)
+	Service Tag: 3CPZF2S
+	Express Service Code: 7299584020
+
+	(314.218)
+	Service Tag: FBPZF2S
+	Express Service Tag: 33360505876
+
+	(314.218)
+	Service Tag: CBPZF2S
+	Express Service Tag: 26830158868
+
+	(314.232)
+	Service Tag: A0006136
+	Express Service Tag: CNOHWNG7742613A8134L
+	
+	(314.219)
+	Service Tag: FGWZF2S
+	Express Service Tag: 33674594068
+
+*************************
+* Notes					*
+*************************
+
+- spellrc should be provided by the tester.
+- linux.words is just a dictionary, the user must provide the dictionary and have the correct name of it in spellrc
+- Use 'make clean' to clear all .o and executable files
+- Use 'make' to create .o files and executables
+- 'program' is the executable file and takes in a parameter which is the user input file
+
